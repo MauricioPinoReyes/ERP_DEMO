@@ -31,4 +31,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-/*modulo de materiales #4 v 5 */
