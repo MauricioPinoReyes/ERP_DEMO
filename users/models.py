@@ -4,8 +4,8 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
 
     user_id =models.AutoField(primary_key=True)
-    username = models.CharField(max_length=150, unique=True) #Nota: Esto puede causar conflictos porque AbstractUser ya tiene estos campos
-    password = models.CharField(max_length=128)              #Nota: Esto puede causar conflictos porque AbstractUser ya tiene estos campos
+    username = models.CharField(max_length=150, unique=True) #Nota: Esto puede causar conflictos cob el hashing de contraseñas porque AbstractUser ya tiene estos campos
+    password = models.CharField(max_length=128)              #Nota: Esto puede causar conflictos cob el hashing de contraseñas porque AbstractUser ya tiene estos campos
 
 
 

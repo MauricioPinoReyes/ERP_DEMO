@@ -24,7 +24,7 @@
         </div>
         <div class="col-span-1">
             <label for="status" class="block text-sm font-medium text-gray-700" >Status</label>
-            <select type="text" name="status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring-indigo-200 focus:ring-opacity-50">
+            <select name="status" id="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring-indigo-200 focus:ring-opacity-50">
             <option value="" {% if not request.GET.status %}selected{% endif %} >All</option>
             <option value="Active" {% if not request.GET.status == "Active" %}selected{% endif%} >Active</option>
             <option value="Inactive" {% if not request.GET.status == "Inactive" %}selected{% endif%}>Inactive</option>
