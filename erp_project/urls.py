@@ -23,6 +23,7 @@ urlpatterns = [
     path('', include('core.urls')),  # # posible problema de rutas, ver comentarios abajo
     path('materials/', include('materials.urls')),
     path('suppliers/', include('suppliers.urls')),
+    path('customers/', include('customers.urls')),
 ]
 
 

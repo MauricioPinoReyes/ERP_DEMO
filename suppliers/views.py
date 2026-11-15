@@ -270,9 +270,7 @@ def download_template_suppliers(request):
 
 
 
-#############################################################
-## min 13:51 falta validar plantilla excel v #7 cargas Masivas
-############################################################
+
 
 
 

@@ -1,12 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Material
+from .models import Material, MaterialType, Unit
+from core.models import Status
 from .forms import MaterialForm
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 import csv
 from django.db import models
 from users.models import UserRole
+
+
+
+
 
 # Create your views here.
 @login_required
@@ -29,9 +34,17 @@ def materials_list(request):
     if name:
         materials_list = materials_list.filter(name__icontains=name)    
     if material_type:
-        materials_list = materials_list.filter(material_type__icontains=material_type)
-    if status is not None and status != '':
-        materials_list = materials_list.filter(status=status)
+        try:
+            material_type_obj = MaterialType.objects.get(name__iexact=material_type)
+            materials_list = materials_list.filter(material_type=material_type_obj)
+        except MaterialType.DoesNotExist:
+            materials_list = materials_list.none()
+    if status:
+        try:
+            status_obj = Status.objects.get(name__iexact=status)
+            materials_list = materials_list.filter(status=status_obj)
+        except Status.DoesNotExist:
+            materials_list = materials_list.none()
 
     if request.GET.get('export') == 'csv':
         response = HttpResponse(content_type='text/csv')
@@ -50,7 +63,6 @@ def materials_list(request):
                 material.unit,
                 material.material_type,
                 material.status,
-                material.status,
                 material.created_by.username if material.created_by else 'N/A',
                 material.created_at.strftime('%Y-%m%d %H:%M:%S'),
                 material.updated_at.strftime('%Y-%m%d %H:%M:%S'),
@@ -61,7 +73,24 @@ def materials_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'materials/materials_list.html', {'page_obj':page_obj})    
+    try:
+        all_statuses = Status.objects.all().order_by('name')
+    except NameError:
+        all_statuses = []
+
+    try:
+        all_material_types = MaterialType.objects.all().order_by('name')
+    except NameError:
+        all_material_types = []
+
+    context = {
+        'page_obj': page_obj,
+        'all_statuses': all_statuses,
+        'all_material_types': all_material_types,
+    }
+
+    return render(request, 'materials/materials_list.html', context)
+
 
 @login_required
 def material_create(request):
