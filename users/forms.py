@@ -16,7 +16,7 @@ class LoginForm(AuthenticationForm):
         label ='Password',
         widget = forms.PasswordInput(attrs={
             'class': 'form-cotrol',
-            'placeholder':'Enter your username'
+            'placeholder':'Enter your password'
         })
     )
 

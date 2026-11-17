@@ -298,3 +298,20 @@ def download_template_suppliers(request):
 # 4. La vista supplier_delete no muestra página de confirmación, solo redirige.
 # 5. La vista supplier_edit no actualiza el campo updated_by.
 # ============================================================================
+
+
+# ============================================================================
+# OBSERVACIONES ADICIONALES PARA VIEWS.PY (SUPPLIERS)
+# ============================================================================
+# 6. Paginación: En el template suppliers_list.html el enlace de "Previous" 
+#    apunta a page= (vacío). La lógica de la vista está bien, pero corregir en el HTML.
+#
+# 7. Dependencia del Contexto: La vista no envía la variable 'permissions' 
+#    que se usa en los templates ({% if permissions.suppliers >= 2 %}). 
+#    Se asume que se está inyectando globalmente vía context_processor en settings.py.
+#
+# 8. El campo Zip Code: En el modelo Supplier que se actualizó, 'zip_code' es un IntegerField.
+#    En el script de carga masiva, si un CSV trae un zip_code con ceros a la izquierda (ej. 0830000),
+#    el IntegerField los ignorará (guardará 830000). Si en el futuro se necesitan los ceros,
+#    se deberá volver a cambiar a CharField.
+# ============================================================================

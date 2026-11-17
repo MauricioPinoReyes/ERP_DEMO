@@ -6,9 +6,10 @@ class User(AbstractUser):
     user_id =models.AutoField(primary_key=True)
     username = models.CharField(max_length=150, unique=True) #Nota: Esto puede causar conflictos cob el hashing de contraseñas porque AbstractUser ya tiene estos campos
     password = models.CharField(max_length=128)              #Nota: Esto puede causar conflictos cob el hashing de contraseñas porque AbstractUser ya tiene estos campos
-
-
-
+    
+    # USERNAME_FIELD indica qué campo usa Django para autenticación.
+    # Es redundante aquí porque AbstractUser ya lo define como 'username' por defecto.
+    # Se mantiene explícito para documentar la intención de login por username.
     USERNAME_FIELD = 'username'
 
     class Meta:

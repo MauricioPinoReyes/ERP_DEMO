@@ -20,7 +20,7 @@ def login_view(request):
                 login(request,user)
                 return redirect('dashboard')
             else:
-                messages.error(request, 'Ivvalid user name or password. ')
+                messages.error(request, 'Invalid user name or password. ')
     else:
         form = LoginForm()
 

@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width-device.width, initial-scale-1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ERP Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -35,7 +35,7 @@
 
         .django-form input:focus {
             outline: none;
-            box-shadow: #a0a7b4;
+            box-shadow: 0 0 0 3px rgba(160, 167, 180, 0.5);
         }
 
         .django-form input::placeholder {
@@ -55,13 +55,13 @@
             <div class="django-form">
                 {{ form.as_p }}
             </div>
+            
             {% if form.errors %}
-            <div class="bg-red-100 border-1-4 boder-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
-                <p> {{ form.nom_field_errors }}</p>
+           <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded" role="alert">
+                <p> {{ form.non_field_errors }}</p>
             </div>
             {% endif %}
-
-            <button type="submit" class="w-full bg-[#233b6e] text-white font-semibold py-3 rounded-lg hover_bg-[#1c305a] transition-colors durations-300 mt-2">
+            <button type="submit" class="w-full bg-[#233b6e] text-white font-semibold py-3 rounded-lg hover:bg-[#1c305a] transition-colors duration-300 mt-2">
                 Login
             </button>
 
