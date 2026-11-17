@@ -10,6 +10,7 @@ import io
 from django.db import models
 from users.models import UserRole
 from django.contrib import messages
+from core.models import Country, Currency  # <-- IMPORTANTE: Agregar este import
 
 # Create your views here.
 @login_required
@@ -32,7 +33,13 @@ def suppliers_list(request):
     if name:
         suppliers_list = suppliers_list.filter(name__icontains=name)    
     if country:
-        suppliers_list = suppliers_list.filter(country__icontains=country)
+        # MODIFICADO: Buscamos por el nombre del país relacionado
+        try:
+            country_obj = Country.objects.get(name__iexact=country)
+            suppliers_list = suppliers_list.filter(country=country_obj)
+        except Country.DoesNotExist:
+            suppliers_list = suppliers_list.none()
+            
     if status is not None and status != '':
         suppliers_list = suppliers_list.filter(status=status)
 
@@ -51,7 +58,7 @@ def suppliers_list(request):
                 supplier.legal_name,
                 supplier.name,
                 supplier.tax_id,
-                supplier.country,
+                supplier.country.name, # MODIFICADO
                 supplier.state_province,
                 supplier.city,
                 supplier.address,
@@ -62,7 +69,7 @@ def suppliers_list(request):
                 supplier.contact_role,
                 supplier.category,
                 supplier.payment_terms,
-                supplier.currency,
+                supplier.currency.name, # MODIFICADO
                 supplier.payment_method,
                 supplier.bank_account,
                 supplier.status,
@@ -76,7 +83,17 @@ def suppliers_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'suppliers/suppliers_list.html', {'page_obj':page_obj})    
+    # MODIFICADO: Enviamos los países y monedas al template para los selectores
+    all_countries = Country.objects.all().order_by('name')
+    all_currencies = Currency.objects.all().order_by('name')
+
+    context = {
+        'page_obj': page_obj,
+        'all_countries': all_countries,
+        'all_currencies': all_currencies,
+    }
+
+    return render(request, 'suppliers/suppliers_list.html', context)    
 
 
 @login_required
@@ -239,18 +256,6 @@ def supplier_bulk_create(request):
 
 @login_required
 def download_template_suppliers(request):
-
-    """ header_fields = ['id_supplier', 'legal_name', 'name', 'tax_id', 'country', 'state_province', 'city', 'address', 'zip_code', 'phone', 'email', 'contact_name', 'contact_role',
-                     'category', 'payment_terms', 'currency', 'payment_method', 'bank_account', 'status']
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="supplier_template.csv"'
-
-    writer = csv.writer(response)
-    writer.writerow(header_fields)
-
-    return response """
-
     header_fields = ['id_supplier', 'legal_name', 'name', 'tax_id', 'country', 'state_province', 'city', 'address', 'zip_code', 'phone', 'email', 'contact_name', 'contact_role',
                      'category', 'payment_terms', 'currency', 'payment_method', 'bank_account', 'status']
 
@@ -266,52 +271,3 @@ def download_template_suppliers(request):
     writer.writerow(header_fields)
 
     return response
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ============================================================================
-# OBSERVACIONES GENERALES DE LA APP SUPPLIERS
-# ============================================================================
-# Esta app gestiona el CRUD de proveedores (Suppliers) con las siguientes características:
-# - Sistema de permisos basado en UserRole (0=sin acceso, 1=solo ver, 2+=puede crear/editar/borrar)
-# - Filtrado dinámico por múltiples campos (id, nombre, país, status)
-# - Exportación a CSV
-# - Paginación de resultados
-# - Auditoría: registra quién crea/modifica cada registro (created_by, updated_by)
-#
-# HALLAZGOS DETECTADOS (para optimización posterior):
-# 1. Inconsistencia en redirects: algunas vistas usan namespace ('suppliers:nombre') 
-#    y otras no ('suppliers'). Esto puede causar confusión en mantenimiento.
-# 2. Falta order_by() en suppliers_list, lo que puede causar resultados inconsistentes 
-#    al paginar.
-# 3. Código duplicado en validación de permisos (mismo bloque en 4 vistas).
-# 4. La vista supplier_delete no muestra página de confirmación, solo redirige.
-# 5. La vista supplier_edit no actualiza el campo updated_by.
-# ============================================================================
-
-
-# ============================================================================
-# OBSERVACIONES ADICIONALES PARA VIEWS.PY (SUPPLIERS)
-# ============================================================================
-# 6. Paginación: En el template suppliers_list.html el enlace de "Previous" 
-#    apunta a page= (vacío). La lógica de la vista está bien, pero corregir en el HTML.
-#
-# 7. Dependencia del Contexto: La vista no envía la variable 'permissions' 
-#    que se usa en los templates ({% if permissions.suppliers >= 2 %}). 
-#    Se asume que se está inyectando globalmente vía context_processor en settings.py.
-#
-# 8. El campo Zip Code: En el modelo Supplier que se actualizó, 'zip_code' es un IntegerField.
-#    En el script de carga masiva, si un CSV trae un zip_code con ceros a la izquierda (ej. 0830000),
-#    el IntegerField los ignorará (guardará 830000). Si en el futuro se necesitan los ceros,
-#    se deberá volver a cambiar a CharField.
-# ============================================================================

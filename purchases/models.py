@@ -41,6 +41,29 @@ class PurchaseOrder(models.Model):
     def __str__(self):
         return self.id_purchase_order
 
+class LinesPurchaseOrder(models.Model):
+
+    id_purchase_order_line = models.CharField(max_length=10, verbose_name="ID Purchase Order Line")
+    id_purchase_order = models.ForeignKey(PurchaseOrder, default=1, on_delete=models.PROTECT, verbose_name="Purchase Order")
+    id_material = models.ForeignKey(Material, default=1, on_delete=models.PROTECT, verbose_name="Material", related_name="id_material_1")
+    position = models.IntegerField(default=1, verbose_name="Position")
+    quantity = models.IntegerField(default=0, verbose_name="Quantity")
+    unit_material = models.ForeignKey(Unit, on_delete=models.PROTECT, verbose_name="Unit")
+    price = models.FloatField(verbose_name="Price")
+    currency_supplier = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name="Currency")
+    received_quantity = models.IntegerField(verbose_name="Received Quantity")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        verbose_name = "Lines Purchase Order"
+        verbose_name_plural = "Lines Purchase Orders"
+
+    def __str__(self):
+        return self.id_purchase_order_line
+
 
 
 
@@ -66,4 +89,59 @@ class PurchaseOrder(models.Model):
 #    Ambos tienen default=1. Esto asume que siempre existirá un registro con ID 1 
 #    en las tablas 'Supplier' y 'OrderStatus'. Si esa fila se elimina, dará error.
 #    (Aunque el on_delete=PROTECT ayuda a prevenirlo).
+# ============================================================================
+
+
+# ============================================================================
+# OBSERVACIONES Y MEJORAS PARA MODELS.PY (APP PURCHASES - LinesPurchaseOrder)
+# ============================================================================
+# 1. LLAVE PRIMARIA (id_purchase_order_line):
+#    El campo está definido como CharField(max_length=10) pero no tiene primary_key=True.
+#    Django creará automáticamente un campo 'id' numérico como llave primaria. 
+#    Si en el futuro se necesita que el ID de la línea (ej: "1-001") sea la llave primaria,
+#    se deberá agregar el atributo primary_key=True al campo.
+#
+# 2. TIPO DE DATO PARA EL PRECIO (price):
+#    Se está usando models.FloatField. Para aplicaciones financieras o contables (ERP), 
+#    los precios NUNCA deben guardarse como Float, ya que pueden generar errores de 
+#    redondeo (ej: 0.1 + 0.2 = 0.30000000000000004). Lo ideal es usar models.DecimalField
+#    con max_digits y decimal_places.
+#
+# 3. CANTIDAD RECIBIDA (received_quantity):
+#    Actualmente no tiene un valor por defecto (default=0). Al crear una línea, la vista
+#    se lo asigna manualmente, pero sería más seguro que el modelo tenga default=0 por
+#    si se crea una línea desde otro lugar (ej: el admin o un script).
+#
+# 4. RELACIÓN CON EL MATERIAL (related_name):
+#    El campo id_material tiene un related_name="id_material_1". Esto es un poco confuso
+#    y no sigue las convenciones de Django (que sugiere plurales, como "purchase_order_lines").
+#    Si se consulta desde el modelo Material, sería `material.id_material_1.all()`.
+#
+# 5. CAMPOS DE AUDITORÍA (created_at, updated_at, created_by):
+#    Excelente práctica incluirlos. Sin embargo, en el modelo de líneas de detalle, a veces
+#    se omite el created_by porque ya se sabe quién creó la orden padre. No es un error,
+#    pero es redundante.
+#
+# 6. BORRADO EN CASCADA (on_delete=models.PROTECT):
+#    El id_purchase_order tiene on_delete=PROTECT. Esto significa que si se intenta 
+#    eliminar una PurchaseOrder que tiene líneas asociadas, Django lanzará un error
+#    (ProtectedError). Es una decisión de diseño, pero para líneas de detalle, normalmente
+#    se usa on_delete=models.CASCADE (si se borra la orden, se borran sus líneas).
+# ============================================================================
+
+
+# ============================================================================
+# OBSERVACIÓN: ESTADO POR DEFECTO (OrderStatus)
+# ============================================================================
+# Actualmente, al crear una orden se asigna el estado buscando por `pk=2`:
+#   status = get_object_or_404(OrderStatus, pk=2)
+#
+# Debido a cómo se cargaron los datos de prueba, el ID 2 corresponde a "Closed" 
+# en lugar de "Draft". Esto significa que todas las órdenes nuevas se crearán 
+# como "Cerradas" por defecto.
+#
+# MEJORA FUTURA:
+# Para evitar que esto se rompa si los IDs cambian (por ejemplo, al recrear la 
+# base de datos), lo ideal es buscar el estado por su símbolo:
+#   status = get_object_or_404(OrderStatus, symbol='DRAFT')
 # ============================================================================
