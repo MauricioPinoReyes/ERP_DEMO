@@ -109,7 +109,8 @@ def create_purchase_order(request):
             try:
                 material = get_object_or_404(Material, id_material=material_id)
                 unit_obj = get_object_or_404(Unit, symbol=unit_symbol)
-                currency_obj = get_object_or_404(Currency, symbol=currency_symbol)
+                #currency_obj = get_object_or_404(Currency, symbol=currency_symbol)
+                currency_obj = Currency.objects.filter(symbol=currency_symbol).first()
             except Material.DoesNotExist:
                 raise ValueError(f"Material ID '{material_id}' not found for line {i}.")
             except Unit.DoesNotExist:
@@ -151,6 +152,7 @@ def create_purchase_order(request):
         return JsonResponse({'error': f'An unexpected server error occurred: {str(e)}'}, status=500)
 
 
+# http://127.0.0.1:8000/purchases/create
 # http://127.0.0.1:8000/purchases/api/supplier/details/SUP-CL-002/
 # http://127.0.0.1:8000/purchases/api/material/details/MAT-PAP-001/
 
@@ -193,3 +195,19 @@ def create_purchase_order(request):
 #    si cambias las rutas en el futuro.
 # ============================================================================
     
+
+# ============================================================================
+# OBSERVACIÓN: BÚSQUEDA DE MONEDA POR SÍMBOLO
+# ============================================================================
+# En la vista create_purchase_order se busca la moneda por su símbolo:
+#   currency_obj = get_object_or_404(Currency, symbol=currency_symbol)
+#
+# ERROR: Múltiples monedas comparten el mismo símbolo (ej: 7 monedas usan "$").
+# Esto lanza el error "get() returned more than one Currency". LINEA 112 currency_obj = get_object_or_404(Currency, symbol=currency_symbol)
+#
+# SOLUCIÓN ACTUAL: Se cambió a .filter().first() para evitar el crash.
+#
+# MEJORA FUTURA:
+# El API get_supplier_details debería devolver `currency.iso_code` en lugar de 
+# `currency.symbol`, y la vista debería buscar por `iso_code=currency_symbol`.
+# ============================================================================    
