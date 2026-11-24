@@ -34,6 +34,7 @@ class Role(models.Model):
     inventory = models.IntegerField(choices = PERMISSION_CHOISES,default=0)
     accounting = models.IntegerField(choices = PERMISSION_CHOISES,default=0)
     reporting = models.IntegerField(choices = PERMISSION_CHOISES,default=0)
+    workorders = models.IntegerField(choices = PERMISSION_CHOISES,default=0)
 
     class Meta:
         db_table = 'roles'

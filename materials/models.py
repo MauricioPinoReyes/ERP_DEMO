@@ -34,6 +34,13 @@ class Material(models.Model):
     description = models.TextField(max_length=250, blank=True, verbose_name="Description")
     unit = models.ForeignKey(Unit, default=1, on_delete=models.PROTECT, verbose_name="Unit measure")
     material_type = models.ForeignKey(MaterialType, default=1, on_delete=models.PROTECT, verbose_name="Material type")
+
+    
+    current_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Current Stock")
+    min_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0.00,verbose_name="Minimum Stock Alert Level", help_text="Nivel de stock que dispara la alerta de compra")
+
+
+
     status = models.ForeignKey(Status, default=1, on_delete=models.PROTECT, verbose_name="Status")
 
     created_at = models.DateTimeField(auto_now_add=True)

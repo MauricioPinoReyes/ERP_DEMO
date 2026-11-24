@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'inventory',
     'accounting',
     'purchases',
+    'workorders',
 
 ]
 

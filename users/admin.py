@@ -26,8 +26,8 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
-    list_display = ('role_name','customers','suppliers','materials','purchases','sales','inventory','accounting','reporting')
-    list_filter = ('customers','suppliers','materials','purchases','sales','inventory','accounting','reporting')
+    list_display = ('role_name','customers','suppliers','materials','purchases','sales','inventory','accounting','reporting','workorders')
+    list_filter = ('customers','suppliers','materials','purchases','sales','inventory','accounting','reporting','workorders')
     search_fields = ('role_name',)
 
 

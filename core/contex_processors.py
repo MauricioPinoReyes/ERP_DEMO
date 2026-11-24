@@ -11,6 +11,7 @@ def get_permissions(request):
         'inventory': 0,
         'accounting': 0,
         'reporting': 0,
+        'workorders': 0,
     }
 
     roles = []
